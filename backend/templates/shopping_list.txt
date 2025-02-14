@@ -1,0 +1,6 @@
+Список покупок
+=============
+
+{% for ingredient in ingredients %}
+{{ ingredient.ingredients__name }} ({{ ingredient.ingredients__measurement_unit }}) — {{ ingredient.total }}
+{% endfor %} 
