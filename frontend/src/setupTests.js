@@ -3,3 +3,5 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+global.clearImmediate = (id) => clearTimeout(id);
+global.setImmediate = (fn, ...args) => setTimeout(fn, 0, ...args);
