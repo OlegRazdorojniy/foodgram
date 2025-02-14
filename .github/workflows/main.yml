@@ -94,6 +94,10 @@ jobs:
         cd frontend/
         npm list @testing-library/dom || echo "@testing-library/dom не найден!"
 
+    - name: Set Jest environment variable
+      run: |
+        echo "JEST_USE_REAL_TIMERS=true" >> $GITHUB_ENV
+
     - name: Test frontend
       run: |
         cd frontend/
