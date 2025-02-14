@@ -3,25 +3,17 @@ from datetime import datetime
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
-
+from recipes.filters import RecipeFilter
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from recipes.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from recipes.serializers import (IngredientSerializer, RecipeCreateSerializer,
+                                 RecipeSerializer, RecipeShortLinkSerializer,
+                                 RecipeShortSerializer, TagSerializer)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from recipes.filters import RecipeFilter, IngredientFilter
-from recipes.models import Favorite, Recipe, ShoppingCart, Tag, Ingredient
-from recipes.serializers import (
-    RecipeSerializer,
-    RecipeShortLinkSerializer,
-    RecipeShortSerializer,
-    TagSerializer,
-    IngredientSerializer,
-    RecipeCreateSerializer,
-)
-from recipes.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -98,13 +90,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorites(self, request):
         user = request.user
         queryset = Recipe.objects.filter(in_favorites=user)
-        
+
         tags = self.request.query_params.getlist('tags')
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
 
         queryset = queryset.order_by('-pub_date')
-        
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -223,8 +215,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         name = self.request.query_params.get('name')
         queryset = super().get_queryset()
-        
+
         if name:
             queryset = queryset.filter(name__istartswith=name)
-        
+
         return queryset

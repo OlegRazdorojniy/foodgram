@@ -3,7 +3,6 @@ import os
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
-
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import User
 
