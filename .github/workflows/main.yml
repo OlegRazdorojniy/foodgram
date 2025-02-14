@@ -89,6 +89,11 @@ jobs:
         cd frontend/
         npm install --legacy-peer-deps
 
+    - name: Verify installed packages
+      run: |
+        cd frontend/
+        npm list @testing-library/dom || echo "@testing-library/dom не найден!"
+
     - name: Test frontend
       run: |
         cd frontend/
