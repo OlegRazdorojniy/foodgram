@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 DATABASES = {
     'default': {
@@ -145,8 +145,10 @@ DJOSER = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
-    "http://localhost:9000",
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://foodgramio.duckdns.org',
+    'http://foodgramio.duckdns.org',
 ]
 
 CORS_URLS_REGEX = r'^/api/.*$'
@@ -168,6 +170,8 @@ if not os.path.exists(os.path.join(MEDIA_ROOT, 'recipes/images')):
     os.makedirs(os.path.join(MEDIA_ROOT, 'recipes/images'))
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://foodgramio.duckdns.org",
-    "http://foodgramio.duckdns.org"
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://foodgramio.duckdns.org',
+    'http://foodgramio.duckdns.org',
 ]
