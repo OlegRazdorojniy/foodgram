@@ -76,7 +76,7 @@ jobs:
     - name: Set up nodeJS
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 18
 
     - name: Clean npm cache and remove node_modules
       run: |
@@ -89,14 +89,21 @@ jobs:
         cd frontend/
         npm install --legacy-peer-deps
 
-    - name: Verify installed packages
+    - name: Create Jest setup file
       run: |
         cd frontend/
-        npm list @testing-library/dom || echo "@testing-library/dom не найден!"
+        echo "
+        global.setImmediate = setTimeout;
+        global.clearImmediate = clearTimeout;
+        " > jest.setup.js
 
-    - name: Set Jest environment variable
+    - name: Update package.json for Jest
       run: |
-        echo "JEST_USE_REAL_TIMERS=true" >> $GITHUB_ENV
+        cd frontend/
+        jq '.jest = {
+          "setupFiles": ["./jest.setup.js"]
+        }' package.json > tmp.json && mv tmp.json package.json
+
 
     - name: Test frontend
       run: |
