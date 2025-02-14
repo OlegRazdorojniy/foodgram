@@ -97,14 +97,6 @@ jobs:
         global.clearImmediate = clearTimeout;
         " > jest.setup.js
 
-    - name: Update package.json for Jest
-      run: |
-        cd frontend/
-        jq '.jest = {
-          "setupFiles": ["./jest.setup.js"]
-        }' package.json > tmp.json && mv tmp.json package.json
-
-
     - name: Test frontend
       run: |
         cd frontend/
