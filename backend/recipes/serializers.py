@@ -226,7 +226,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time', 'tags', 'ingredients'
         ]
         errors = {}
-        
+
         for field in required_fields:
             if field not in data:
                 errors[field] = ['Обязательное поле.']
@@ -293,7 +293,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         if tags is not None:
             instance.tags.clear()
             instance.tags.set(tags)
