@@ -1,6 +1,6 @@
+from django.core.files.storage import default_storage
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from django.core.files.storage import default_storage
 
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
@@ -9,13 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import Subscription, User
-from users.serializers import (
-    ChangePasswordSerializer,
-    LoginSerializer,
-    UserCreateSerializer,
-    UserSerializer,
-    UserAvatarSerializer,
-)
+from users.serializers import (ChangePasswordSerializer, LoginSerializer,
+                               UserAvatarSerializer, UserCreateSerializer,
+                               UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -117,11 +113,11 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def avatar(self, request):
         user = request.user
-        
+
         if request.method == 'GET':
             serializer = UserAvatarSerializer(user)
             return Response(serializer.data)
-            
+
         if request.method == 'DELETE':
             if user.avatar and user.avatar.name != 'users/avatars/default.png':
                 default_storage.delete(user.avatar.name)
