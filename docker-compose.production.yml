@@ -12,21 +12,16 @@ services:
     env_file: .env
     volumes:
       - pg_data1:/var/lib/postgresql/data
-    restart: always
-
   backend:
     image: oleg565/foodgram_backend
     env_file: .env
     volumes:
       - static:/backend_static
       - media:/app/media
-    depends_on:
-      - db
-    restart: always
 
   frontend:
-    image: oleg565/foodgram_frontend
     env_file: .env
+    image: oleg565/foodgram_frontend
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
@@ -39,7 +34,3 @@ services:
       - media:/media
     ports:
       - 8001:80
-    depends_on:
-      - backend
-      - frontend
-    restart: always
