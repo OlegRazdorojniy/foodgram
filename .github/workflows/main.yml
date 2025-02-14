@@ -78,30 +78,15 @@ jobs:
       with:
         node-version: 18
 
-    - name: Clean npm cache and remove node_modules
-      run: |
-        cd frontend/
-        rm -rf node_modules package-lock.json
-        npm cache clean --force
-
     - name: Install dependencies
       run: |
         cd frontend/
-        npm install --legacy-peer-deps
-
-    - name: Create Jest setup file
-      run: |
-        cd frontend/
-        echo "
-        global.setImmediate = setTimeout;
-        global.clearImmediate = clearTimeout;
-        " > jest.setup.js
+        npm ci
 
     - name: Test frontend
       run: |
         cd frontend/
-        echo "Skipping frontend tests"
-        # npm run test -- --runInBand
+        npm run test
 
   build_frontend_and_push_to_docker_hub:
     if: github.ref == 'refs/heads/main'
@@ -175,7 +160,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
-          cd kittygram
+          cd foodgram
           sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml down
           sudo docker compose -f docker-compose.production.yml up -d
