@@ -24,8 +24,6 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'default-key')
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,26 +35,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'djoser',
+    'corsheaders',
     'recipes.apps.RecipesConfig',
     'users.apps.UsersConfig',
     'staticpages.apps.StaticPagesConfig',
-    'corsheaders',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PAGINATION_CLASS':
-        'recipes.pagination.CustomPageNumberPagination',
-    'PAGE_SIZE': 6,
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ],
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -92,21 +75,16 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME':
-        'django.contrib.auth.password_validation.'
-        'UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -139,9 +117,26 @@ DJOSER = {
         'current_user': 'users.serializers.UserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user': ['rest_framework.permissions.AllowAny'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
+    'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'recipes.pagination.CustomPageNumberPagination',
+    'PAGE_SIZE': 6,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -168,11 +163,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_ALL_ORIGINS = False
 
-if not os.path.exists(os.path.join(MEDIA_ROOT, 'users/avatars')):
-    os.makedirs(os.path.join(MEDIA_ROOT, 'users/avatars'))
-if not os.path.exists(os.path.join(MEDIA_ROOT, 'recipes/images')):
-    os.makedirs(os.path.join(MEDIA_ROOT, 'recipes/images'))
-
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'https://localhost',
@@ -181,3 +171,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://foodgramio.duckdns.org',
     'http://foodgramio.duckdns.org',
 ]
+
+os.makedirs(os.path.join(MEDIA_ROOT, 'users/avatars'), exist_ok=True)
+os.makedirs(os.path.join(MEDIA_ROOT, 'recipes/images'), exist_ok=True)
