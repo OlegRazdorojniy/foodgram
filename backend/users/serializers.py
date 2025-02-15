@@ -10,8 +10,8 @@ from users.models import Subscription
 User = get_user_model()
 
 
-class UserCreateSerializer(BaseUserCreateSerializer):
-    class Meta(BaseUserCreateSerializer.Meta):
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
         model = User
         fields = (
             'email',
@@ -21,6 +21,11 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'last_name',
             'password',
         )
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
 
 
 class RecipeMinifiedSerializer(serializers.ModelSerializer):
