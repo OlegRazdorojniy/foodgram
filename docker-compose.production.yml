@@ -20,11 +20,12 @@ services:
     depends_on:
       - db
     volumes:
-      - static:/app/static
+      - static:/backend_static
       - media:/app/media
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
+             cp -r /app/collected_static/. /backend_static/static/ &&
              gunicorn foodgram.wsgi:application --bind 0.0.0.0:8001"
 
   frontend:
@@ -33,7 +34,7 @@ services:
     depends_on:
       - backend
     env_file: .env
-    command: cp -r /app/build/. /staticfiles/
+    command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/staticfiles
 
