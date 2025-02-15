@@ -22,6 +22,11 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'password',
         )
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Пользователь с таким email уже существует.")
+        return value
+
 
 class RecipeMinifiedSerializer(serializers.ModelSerializer):
     class Meta:
