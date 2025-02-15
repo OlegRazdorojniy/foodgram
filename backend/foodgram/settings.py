@@ -145,12 +145,8 @@ DJOSER = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost',
-    'https://localhost',
-    'http://127.0.0.1',
-    'https://127.0.0.1',
-    'https://foodgramio.duckdns.org',
-    'http://foodgramio.duckdns.org',
+    "http://localhost",
+    "http://localhost:9000",
 ]
 
 CORS_URLS_REGEX = r'^/api/.*$'
@@ -166,18 +162,12 @@ CORS_ALLOW_METHODS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_ALL_ORIGINS = False
-
 if not os.path.exists(os.path.join(MEDIA_ROOT, 'users/avatars')):
     os.makedirs(os.path.join(MEDIA_ROOT, 'users/avatars'))
 if not os.path.exists(os.path.join(MEDIA_ROOT, 'recipes/images')):
     os.makedirs(os.path.join(MEDIA_ROOT, 'recipes/images'))
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost',
-    'https://localhost',
-    'http://127.0.0.1',
-    'https://127.0.0.1',
-    'https://foodgramio.duckdns.org',
-    'http://foodgramio.duckdns.org',
+    "https://foodgramio.duckdns.org",
+    "http://foodgramio.duckdns.org"
 ]
