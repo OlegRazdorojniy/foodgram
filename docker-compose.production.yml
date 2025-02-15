@@ -48,4 +48,4 @@ services:
       - static:/staticfiles
       - media:/media
     ports:
-      - 80:80
+      - 8001:80
