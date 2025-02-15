@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from recipes.fields import Base64ImageField
 from recipes.models import Recipe
@@ -9,8 +10,8 @@ from users.models import Subscription
 User = get_user_model()
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
-    class Meta:
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
         model = User
         fields = (
             'email',
@@ -20,11 +21,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'last_name',
             'password',
         )
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
 
 
 class RecipeMinifiedSerializer(serializers.ModelSerializer):
