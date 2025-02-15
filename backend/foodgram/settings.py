@@ -124,8 +124,8 @@ DJOSER = {
     'TOKEN_AUTHENTICATION_RULES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'AUTHENTICATION_BACKEND': 'django.contrib.auth.backends.ModelBackend',
 }
-
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
