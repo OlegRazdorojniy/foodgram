@@ -121,11 +121,15 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
     'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+    'TOKEN_AUTHENTICATION_RULES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

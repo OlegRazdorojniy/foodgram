@@ -7,6 +7,8 @@ class User(AbstractUser):
         max_length=254,
         unique=True,
         verbose_name='Электронная почта',
+        blank=False,
+        null=False
     )
     first_name = models.CharField(
         max_length=150,
