@@ -1,3 +1,4 @@
+print("DEBUG: Загружен UserCreateSerializer")
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -30,6 +31,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         return value
 
     def create(self, validated_data):
+        print("DEBUG: Метод create() вызван")
         email = validated_data.pop('email', None)
         password = validated_data.pop('password', None)
 
