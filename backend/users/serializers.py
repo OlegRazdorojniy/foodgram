@@ -32,13 +32,15 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     def create(self, validated_data):
         print("DEBUG: Метод create() вызван")
 
-        email = validated_data.pop('email', None)  # Извлекаем email
+        email = validated_data.pop('email', None)
         if not email:
-            raise serializers.ValidationError({'email': 'Email обязателен для регистрации.'})
+            raise serializers.ValidationError({
+                'email': 'Email обязателен для регистрации.'
+            })
 
-        user = User.objects.create_user(email=email, **validated_data)  # Передаем email явно
+        user = User.objects.create_user(email=email, **validated_data)
 
-        print(f"Создан пользователь: {user}, email: {user.email}")  # Проверяем email
+        print(f"Создан пользователь: {user}, email: {user.email}")
         return user
 
 
