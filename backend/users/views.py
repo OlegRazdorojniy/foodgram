@@ -10,31 +10,24 @@ from rest_framework.authtoken.models import Token
 from users.models import Subscription, User
 from users.serializers import (
     ChangePasswordSerializer,
-    LoginSerializer,             # Если больше не используешь `login`, можно удалить
+    LoginSerializer,
     UserAvatarSerializer,
-    UserCreateSerializer,        # Если больше не используешь `user_create`, можно удалить
+    UserCreateSerializer,
     UserSerializer
 )
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Обрабатывает логику подписок, аватаров, профиля и т.д.
-    Регистрация пользователей через Djoser -> /api/auth/users/
-    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        """Запрещаем создание пользователей через POST /api/users/.
-        Регистрироваться надо через Djoser: POST /api/auth/users/
-        """
         return Response(
             {"detail": "Регистрация через Djoser: POST /api/auth/users/"},
             status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
 
     def get_serializer_class(self):
-        """Если нужна особая логика для update_avatar или других action — добавляй тут."""
         if self.action == 'update_avatar':
             return UserAvatarSerializer
         return self.serializer_class
@@ -45,7 +38,6 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, pk=None):
-        """Подписка на пользователя."""
         author = get_object_or_404(User, id=pk)
         if request.method == 'POST':
             if request.user == author:
@@ -79,7 +71,6 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscriptions(self, request):
-        """Список подписок текущего пользователя."""
         subscriptions = (
             User.objects.filter(following__user=request.user)
             .annotate(recipes_count=Count('recipes'))
@@ -108,7 +99,6 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='set_password',
     )
     def set_password(self, request):
-        """Смена пароля."""
         serializer = ChangePasswordSerializer(
             data=request.data,
             context={'request': request},
@@ -131,7 +121,6 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me/avatar',
     )
     def avatar(self, request):
-        """Просмотр/изменение/удаление аватара."""
         user = request.user
 
         if request.method == 'GET':
@@ -167,36 +156,12 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me'
     )
     def me(self, request):
-        """Профиль текущего пользователя."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-
-
-# Если хотим использовать Djoser для регистрации/логина, то удаляем/комментируем:
-# @api_view(['POST'])
-# def user_create(request):
-#     serializer = UserCreateSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['POST'])
-# def login(request):
-#     serializer = LoginSerializer(
-#         data=request.data,
-#         context={'request': request},
-#     )
-#     if serializer.is_valid():
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({'auth_token': token.key})
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    """При желании можно оставить свой logout или использовать Djoser."""
     Token.objects.filter(user=request.user).delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
