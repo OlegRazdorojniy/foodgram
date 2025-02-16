@@ -29,6 +29,16 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             )
         return value
 
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        if not email:
+            raise serializers.ValidationError({'email': 'Email обязателен для регистрации.'})
+
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])  # Хешируем пароль
+        user.save()
+        return user
+
 
 class RecipeMinifiedSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,7 +92,7 @@ class LoginSerializer(serializers.Serializer):
         if email and password:
             user = authenticate(
                 request=self.context.get('request'),
-                username=email,
+                email=email,
                 password=password,
             )
             if not user:
