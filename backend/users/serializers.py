@@ -13,14 +13,7 @@ User = get_user_model()
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
-        )
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password')
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -30,17 +23,25 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         return value
 
     def create(self, validated_data):
-        print("DEBUG: Метод create() вызван")
-
         email = validated_data.pop('email', None)
+        password = validated_data.pop('password', None)
+
         if not email:
             raise serializers.ValidationError({
                 'email': 'Email обязателен для регистрации.'
             })
 
-        user = User.objects.create_user(email=email, **validated_data)
+        if not password:
+            raise serializers.ValidationError({
+                'password': 'Пароль обязателен для регистрации.'
+            })
+
+        user = User(email=email, **validated_data)
+        user.set_password(password)
+        user.save()
 
         print(f"Создан пользователь: {user}, email: {user.email}")
+
         return user
 
 
