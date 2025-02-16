@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscription, User
 from users.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
-                               UserSerializer)
+                               UserCreateSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -16,10 +16,12 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Регистрация через Djoser: POST /api/auth/users/"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+        serializer = UserCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        user_data = UserSerializer(user, context={'request': request}).data
+        return Response(user_data, status=status.HTTP_201_CREATED)
 
     def get_serializer_class(self):
         if self.action == 'update_avatar':
@@ -79,6 +81,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 context={'request': request},
             )
             return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(
             subscriptions,
             many=True,
@@ -103,10 +106,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 {'detail': 'Пароль успешно изменен'},
                 status=status.HTTP_204_NO_CONTENT,
             )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         methods=['get', 'put', 'delete'],
@@ -138,10 +138,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 default_storage.delete(user.avatar.name)
             serializer.save()
             return Response(serializer.data)
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
