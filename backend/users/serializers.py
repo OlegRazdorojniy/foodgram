@@ -1,4 +1,3 @@
-print("DEBUG: Загружен UserCreateSerializer")
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -8,6 +7,7 @@ from recipes.models import Recipe
 from rest_framework import serializers
 from users.models import Subscription
 
+print("DEBUG: Загружен UserCreateSerializer")
 User = get_user_model()
 
 
