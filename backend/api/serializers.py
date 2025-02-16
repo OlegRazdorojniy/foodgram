@@ -7,7 +7,6 @@ from recipes.models import Recipe
 from rest_framework import serializers
 from users.models import Subscription
 
-print("DEBUG: Загружен UserCreateSerializer")
 User = get_user_model()
 
 
@@ -48,8 +47,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         user = User(email=email, **validated_data)
         user.set_password(password)
         user.save()
-
-        print(f"Создан пользователь: {user}, email: {user.email}")
 
         return user
 

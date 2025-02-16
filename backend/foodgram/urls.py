@@ -12,9 +12,9 @@ router.register('tags', TagViewSet, basename='tags')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/', include('users.urls')),
-    path('api/', include('staticpages.urls')),
+    path('api/recipes/', include(router.urls)),
+    path('api/users/', include('users.urls')),
+    path('api/staticpages/', include('staticpages.urls')),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
 ]
