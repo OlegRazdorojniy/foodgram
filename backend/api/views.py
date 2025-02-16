@@ -1,8 +1,10 @@
-from api.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
-                             UserCreateSerializer, UserSerializer)
+from api.serializers import (ChangePasswordSerializer, IngredientSerializer,
+                             UserAvatarSerializer, UserCreateSerializer,
+                             UserSerializer)
 from django.core.files.storage import default_storage
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from recipes.models import Ingredient
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, api_view, permission_classes
@@ -156,3 +158,8 @@ class UserViewSet(viewsets.ModelViewSet):
 def logout(request):
     Token.objects.filter(user=request.user).delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class IngredientViewSet(viewsets.ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
