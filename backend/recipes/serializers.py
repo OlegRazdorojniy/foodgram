@@ -1,8 +1,8 @@
+from api.serializers import UserSerializer
 from django.db import transaction
 from recipes.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
-from users.serializers import UserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
