@@ -180,3 +180,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 os.makedirs(os.path.join(MEDIA_ROOT, 'users/avatars'), exist_ok=True)
 os.makedirs(os.path.join(MEDIA_ROOT, 'recipes/images'), exist_ok=True)
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
