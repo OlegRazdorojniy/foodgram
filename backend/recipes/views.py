@@ -12,6 +12,7 @@ from recipes.serializers import (IngredientSerializer, RecipeCreateSerializer,
                                  RecipeShortSerializer, TagSerializer)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -210,7 +211,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all().order_by('name')
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly]
-    pagination_class = None
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
