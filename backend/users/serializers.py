@@ -30,14 +30,20 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         return value
 
     def create(self, validated_data):
-        email = validated_data.get('email')
-        print(f"Полученный email в сериализаторе: {email}")
-        if not email:
-            raise serializers.ValidationError({
-                'email': 'Email обязателен для регистрации.'
-            })
+        print("DEBUG: Метод create() вызван")
 
-        user = User.objects.create_user(**validated_data)
+        email = validated_data.pop('email', None)
+        password = validated_data.pop('password', None)
+
+        if not email:
+            raise serializers.ValidationError({'email': 'Email обязателен для регистрации.'})
+
+        print(f"Полученный email: {email}")
+
+        user = User.objects.create_user(email=email, **validated_data)
+        user.set_password(password)
+        user.save()
+
         print(f"Создан пользователь: {user}, email: {user.email}")
         return user
 
@@ -94,7 +100,7 @@ class LoginSerializer(serializers.Serializer):
         if email and password:
             user = authenticate(
                 request=self.context.get('request'),
-                email=email,
+                username=email,
                 password=password,
             )
             if not user:
