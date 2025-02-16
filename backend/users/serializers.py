@@ -36,7 +36,9 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         password = validated_data.pop('password', None)
 
         if not email:
-            raise serializers.ValidationError({'email': 'Email обязателен для регистрации.'})
+            raise serializers.ValidationError({
+                'email': 'Email обязателен для регистрации.'
+            })
 
         print(f"Полученный email: {email}")
 
