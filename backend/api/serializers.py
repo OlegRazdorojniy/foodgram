@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from recipes.fields import Base64ImageField
-from recipes.models import Ingredient, Recipe
+from recipes.models import Recipe
 from rest_framework import serializers
 from users.models import Subscription
 
@@ -163,9 +163,3 @@ class UserAvatarSerializer(serializers.ModelSerializer):
                 'Размер изображения не должен превышать 2MB'
             )
         return value
-
-
-class IngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = '__all__'

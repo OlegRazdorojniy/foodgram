@@ -1,6 +1,5 @@
-from api.serializers import (ChangePasswordSerializer, IngredientSerializer,
-                             UserAvatarSerializer, UserCreateSerializer,
-                             UserSerializer)
+from api.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
+                             UserCreateSerializer, UserSerializer)
 from django.core.files.storage import default_storage
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
