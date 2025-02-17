@@ -211,13 +211,13 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all().order_by('name')
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly]
-    pagination_class = PageNumberPagination
+    pagination_class = None
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
-        queryset = super().get_queryset()
+        queryset = self.queryset
 
         if name:
-            queryset = queryset.filter(name__istartswith=name)
+            queryset = queryset.filter(name__icontains=name)
 
-        return queryset
+        return queryset.order_by('name')
