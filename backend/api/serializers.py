@@ -48,7 +48,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class RecipeMinifiedSerializer(serializers.ModelSerializer):
+class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -84,7 +84,7 @@ class UserSerializer(serializers.ModelSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
-        serializer = RecipeMinifiedSerializer(recipes, many=True)
+        serializer = RecipeShortSerializer(recipes, many=True)
         return serializer.data
 
     def get_recipes_count(self, obj):
