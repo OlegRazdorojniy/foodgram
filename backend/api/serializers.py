@@ -285,9 +285,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         max_value=MAX_COOKING_TIME,
         error_messages={
             'min_value': f'Время приготовления не может быть меньше'
-                        f'{MIN_COOKING_TIME} минуты',
+                         f'{MIN_COOKING_TIME} минуты',
             'max_value': f'Время приготовления не может быть больше'
-                        f'{MAX_COOKING_TIME} минут'
+                         f'{MAX_COOKING_TIME} минут'
         }
     )
 
@@ -321,7 +321,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        
+
         self._create_ingredients(recipe, ingredients)
         return recipe
 
