@@ -1,12 +1,16 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
+
+from rest_framework import serializers
+
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as BaseUserSerializer
+
 from recipes.fields import Base64ImageField
 from recipes.models import Recipe
-from rest_framework import serializers
-from users.models import Subscription
+from user.models import Subscription
 
+MAX_AVATAR_SIZE = 2 * 1024 * 1024
 User = get_user_model()
 
 
@@ -25,12 +29,11 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                "Пользователь с таким email уже существует."
+                'Пользователь с таким email уже существует.'
             )
         return value
 
     def create(self, validated_data):
-        print("DEBUG: Метод create() вызван")
         email = validated_data.pop('email', None)
         password = validated_data.pop('password', None)
 
@@ -77,13 +80,10 @@ class UserSerializer(BaseUserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
+        user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Subscription.objects.filter(
-            user=user,
-            author=obj
-        ).exists()
+        return obj.followers.filter(user=user).exists()
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -158,8 +158,27 @@ class UserAvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar',)
 
     def validate_avatar(self, value):
-        if value and value.size > 2 * 1024 * 1024:  # 2MB
+        if value and value.size > MAX_AVATAR_SIZE:  # 2MB
             raise serializers.ValidationError(
                 'Размер изображения не должен превышать 2MB'
             )
         return value
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ('user', 'author')
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        author = attrs.get('author')
+
+        if user == author:
+            raise serializers.ValidationError('Нельзя подписаться на самого себя')
+
+        # Проверка, если подписка уже существует
+        if Subscription.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError('Вы уже подписаны на этого пользователя')
+
+        return attrs

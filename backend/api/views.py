@@ -1,13 +1,16 @@
-from api.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
-                             UserCreateSerializer, UserSerializer)
 from django.core.files.storage import default_storage
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from api.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
+                             UserCreateSerializer, UserSerializer,
+                             SubscriptionSerializer)
 from users.models import Subscription, User
 
 
@@ -35,29 +38,19 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscribe(self, request, pk=None):
         author = get_object_or_404(User, id=pk)
-        if request.method == 'POST':
-            if request.user == author:
-                return Response(
-                    {'error': 'Нельзя подписаться на самого себя'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            subscription, created = Subscription.objects.get_or_create(
-                user=request.user,
-                author=author,
-            )
-            if not created:
-                return Response(
-                    {'error': 'Вы уже подписаны на этого пользователя'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            serializer = self.get_serializer(author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        subscription = get_object_or_404(
-            Subscription,
-            user=request.user,
-            author=author,
-        )
+        if request.method == 'POST':
+            data = {
+                'user': request.user,
+                'author': author,
+            }
+            serializer = SubscriptionSerializer(data=data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        subscription = get_object_or_404(Subscription, user=request.user, author=author)
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -100,13 +93,12 @@ class UserViewSet(viewsets.ModelViewSet):
             data=request.data,
             context={'request': request},
         )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {'detail': 'Пароль успешно изменен'},
-                status=status.HTTP_204_NO_CONTENT,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {'detail': 'Пароль успешно изменен'},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
     @action(
         methods=['get', 'put', 'delete'],
@@ -133,12 +125,12 @@ class UserViewSet(viewsets.ModelViewSet):
             data=request.data,
             partial=True
         )
-        if serializer.is_valid():
-            if user.avatar and user.avatar.name != 'users/avatars/default.png':
-                default_storage.delete(user.avatar.name)
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(
+            raise_exception=True)
+        if user.avatar and user.avatar.name != 'users/avatars/default.png':
+            default_storage.delete(user.avatar.name)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(
         detail=False,
@@ -154,5 +146,5 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    Token.objects.filter(user=request.user).delete()
+    request.user.tokens.all().delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
