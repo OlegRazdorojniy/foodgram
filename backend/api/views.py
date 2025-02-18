@@ -37,29 +37,28 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscribe(self, request, pk=None):
         author = get_object_or_404(User, id=pk)
+        user = request.user
+
+        if user == author:
+            return Response(
+                {'errors': 'Нельзя подписаться на самого себя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if request.method == 'POST':
-            data = {
-                'user': request.user.id,
-                'author': author.id,
-            }
-            serializer = SubscriptionSerializer(
-                data=data, context={'request': request}
-            )
-            if serializer.is_valid():
-                serializer.save()
-                author_serializer = UserSerializer(
-                    author, context={'request': request}
-                )
+            if Subscription.objects.filter(user=user, author=author).exists():
                 return Response(
-                    author_serializer.data, status=status.HTTP_201_CREATED
+                    {'errors': 'Вы уже подписаны на этого пользователя'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+
+            Subscription.objects.create(user=user, author=author)
+            
+            serializer = UserSerializer(author, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         subscription = get_object_or_404(
-            Subscription, user=request.user, author=author
+            Subscription, user=user, author=author
         )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -71,24 +70,24 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscriptions(self, request):
         subscriptions = (
-            User.objects.filter(followers__user=request.user)
+            User.objects.filter(subscriptions__user=request.user)
             .annotate(recipes_count=Count('recipes'))
             .prefetch_related('recipes')
-            .order_by('-recipes__pub_date')
+            .order_by('id')
         )
         page = self.paginate_queryset(subscriptions)
         if page is not None:
             serializer = self.get_serializer(
                 page,
                 many=True,
-                context={'request': request},
+                context={'request': request}
             )
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(
             subscriptions,
             many=True,
-            context={'request': request},
+            context={'request': request}
         )
         return Response(serializer.data)
 
