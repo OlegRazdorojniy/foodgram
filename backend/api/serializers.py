@@ -6,9 +6,7 @@ from rest_framework import serializers
 
 from recipes.fields import Base64ImageField
 from recipes.models import (
-    MAX_COOKING_TIME,
     MAX_INGREDIENT_AMOUNT,
-    MIN_COOKING_TIME,
     MIN_INGREDIENT_AMOUNT,
     Favorite,
     Ingredient,
@@ -218,8 +216,12 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
         min_value=MIN_INGREDIENT_AMOUNT,
         max_value=MAX_INGREDIENT_AMOUNT,
         error_messages={
-            'min_value': f'Количество ингредиента не может быть меньше {MIN_INGREDIENT_AMOUNT}',
-            'max_value': f'Количество ингредиента не может быть больше {MAX_INGREDIENT_AMOUNT}'
+            'min_value': f'Количество ингредиента '
+                         f'не может быть меньше'
+                         f'{MIN_INGREDIENT_AMOUNT}',
+            'max_value': f'Количество ингредиента '
+                         f'не может быть больше'
+                         f'{MAX_INGREDIENT_AMOUNT}'
         }
     )
 
