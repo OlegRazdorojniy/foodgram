@@ -1,13 +1,5 @@
 from django_filters import rest_framework as filters
-from recipes.models import Ingredient, Recipe, Tag
-
-
-class IngredientFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
-
-    class Meta:
-        model = Ingredient
-        fields = ('name',)
+from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
@@ -37,4 +29,4 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if value and user.is_authenticated:
             return queryset.filter(in_shopping_cart=user)
-        return queryset
+        return queryset 

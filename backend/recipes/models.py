@@ -1,10 +1,18 @@
 import uuid
 
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 User = get_user_model()
+
+# Константы для валидации времени приготовления
+MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 32_000
+
+# Константы для валидации количества ингредиентов
+MIN_INGREDIENT_AMOUNT = 1
+MAX_INGREDIENT_AMOUNT = 32_000
 
 
 class Tag(models.Model):
@@ -89,9 +97,18 @@ class Recipe(models.Model):
         verbose_name='Теги',
         related_name='recipes',
     )
-    cooking_time = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name='Время приготовления (в минутах)',
+    cooking_time = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(
+                MIN_COOKING_TIME,
+                message=f'Время приготовления не может быть меньше {MIN_COOKING_TIME} минуты'
+            ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                message=f'Время приготовления не может быть больше {MAX_COOKING_TIME} минут'
+            )
+        ],
+        verbose_name='Время приготовления в минутах',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -141,8 +158,17 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
     )
-    amount = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
+    amount = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(
+                MIN_INGREDIENT_AMOUNT,
+                message=f'Количество ингредиента не может быть меньше {MIN_INGREDIENT_AMOUNT}'
+            ),
+            MaxValueValidator(
+                MAX_INGREDIENT_AMOUNT,
+                message=f'Количество ингредиента не может быть больше {MAX_INGREDIENT_AMOUNT}'
+            )
+        ],
         verbose_name='Количество',
     )
 
