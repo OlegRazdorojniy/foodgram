@@ -8,11 +8,9 @@ from recipes.fields import Base64ImageField
 from recipes.models import (
     MAX_INGREDIENT_AMOUNT,
     MIN_INGREDIENT_AMOUNT,
-    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
-    ShoppingCart,
     Tag,
 )
 from users.models import Subscription
