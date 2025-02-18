@@ -8,8 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.serializers import (ChangePasswordSerializer, UserAvatarSerializer,
-                             UserCreateSerializer, UserSerializer,
-                             SubscriptionSerializer)
+                             UserCreateSerializer, UserSerializer)
 from users.models import Subscription, User
 
 
@@ -53,7 +52,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 )
 
             Subscription.objects.create(user=user, author=author)
-            
+
             serializer = UserSerializer(author, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
