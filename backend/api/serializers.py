@@ -175,10 +175,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         author = attrs.get('author')
 
         if user == author:
-            raise serializers.ValidationError('Нельзя подписаться на самого себя')
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя'
+            )
 
-        # Проверка, если подписка уже существует
         if Subscription.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError('Вы уже подписаны на этого пользователя')
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя'
+            )
 
         return attrs

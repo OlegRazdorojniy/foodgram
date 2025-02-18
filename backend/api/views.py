@@ -3,7 +3,6 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from rest_framework import status, viewsets
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -44,13 +43,21 @@ class UserViewSet(viewsets.ModelViewSet):
                 'user': request.user,
                 'author': author,
             }
-            serializer = SubscriptionSerializer(data=data, context={'request': request})
+            serializer = SubscriptionSerializer(
+                data=data, context={'request': request}
+            )
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        subscription = get_object_or_404(Subscription, user=request.user, author=author)
+        subscription = get_object_or_404(
+            Subscription, user=request.user, author=author
+        )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
