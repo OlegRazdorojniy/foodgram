@@ -6,7 +6,9 @@ from rest_framework import serializers
 
 from recipes.fields import Base64ImageField
 from recipes.models import (
+    MAX_COOKING_TIME,
     MAX_INGREDIENT_AMOUNT,
+    MIN_COOKING_TIME,
     MIN_INGREDIENT_AMOUNT,
     Ingredient,
     Recipe,
@@ -268,3 +270,116 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return obj.in_shopping_cart.filter(id=user.id).exists()
+
+
+class RecipeCreateSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+    )
+    ingredients = RecipeIngredientCreateSerializer(many=True)
+    author = UserSerializer(read_only=True)
+    cooking_time = serializers.IntegerField(
+        min_value=MIN_COOKING_TIME,
+        max_value=MAX_COOKING_TIME,
+        error_messages={
+            'min_value': f'Время приготовления не может быть меньше'
+                        f'{MIN_COOKING_TIME} минуты',
+            'max_value': f'Время приготовления не может быть больше'
+                        f'{MAX_COOKING_TIME} минут'
+        }
+    )
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'text',
+            'ingredients',
+            'tags',
+            'cooking_time',
+            'author',
+        )
+
+    def _create_ingredients(self, recipe, ingredients_data):
+        """Вспомогательный метод для создания ингредиентов рецепта."""
+        recipe_ingredients = [
+            RecipeIngredient(
+                recipe=recipe,
+                ingredient=ingredient['id'],
+                amount=ingredient['amount']
+            )
+            for ingredient in ingredients_data
+        ]
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        
+        self._create_ingredients(recipe, ingredients)
+        return recipe
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if tags is not None:
+            instance.tags.clear()
+            instance.tags.set(tags)
+
+        if ingredients is not None:
+            instance.recipe_ingredients.all().delete()
+            self._create_ingredients(instance, ingredients)
+
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        serializer = RecipeSerializer(instance, context=self.context)
+        return serializer.data
+
+    def validate(self, data):
+        required_fields = {
+            'name', 'text', 'cooking_time', 'tags', 'ingredients'
+        }
+        errors = {}
+
+        for field in required_fields:
+            if field not in data:
+                errors[field] = ['Обязательное поле.']
+            elif not data[field]:
+                errors[field] = ['Это поле не может быть пустым.']
+
+        if 'ingredients' in data:
+            if not data['ingredients']:
+                errors['ingredients'] = ['Добавьте хотя бы один ингредиент.']
+            else:
+                ingredient_ids = {
+                    ingredient['id'].id for ingredient in data['ingredients']
+                }
+                if len(ingredient_ids) != len(data['ingredients']):
+                    errors['ingredients'] = [
+                        'Ингредиенты не должны повторяться.'
+                    ]
+
+        if 'tags' in data:
+            if not data['tags']:
+                errors['tags'] = ['Добавьте хотя бы один тег.']
+            else:
+                tags_set = {tag for tag in data['tags']}
+                if len(tags_set) != len(data['tags']):
+                    errors['tags'] = ['Теги не должны повторяться.']
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return data
