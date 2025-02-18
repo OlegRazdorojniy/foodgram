@@ -71,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscriptions(self, request):
         subscriptions = (
-            User.objects.filter(following__user=request.user)
+            User.objects.filter(followers__user=request.user)
             .annotate(recipes_count=Count('recipes'))
             .prefetch_related('recipes')
             .order_by('-recipes__pub_date')
