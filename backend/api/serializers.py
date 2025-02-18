@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.files.storage import default_storage
-
 from rest_framework import serializers
 
 from recipes.fields import Base64ImageField
@@ -15,7 +14,7 @@ from recipes.models import (
     RecipeIngredient,
     Tag,
 )
-from users.models import Subscription
+from users.models import Subscription, User
 
 MAX_AVATAR_SIZE = 2 * 1024 * 1024
 User = get_user_model()
@@ -73,13 +72,13 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
+        user = self.context['request'].user
         if user.is_anonymous:
             return False
         return user.subscriptions.filter(author=obj).exists()
 
     def get_recipes(self, obj):
-        request = self.context.get('request')
+        request = self.context['request']
         limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
         if limit:
@@ -173,7 +172,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                 'Нельзя подписаться на самого себя'
             )
 
-        if Subscription.objects.filter(user=user, author=author).exists():
+        if author in user.subscriptions.values_list('author', flat=True):
             raise serializers.ValidationError(
                 'Вы уже подписаны на этого пользователя'
             )
@@ -217,10 +216,10 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
         max_value=MAX_INGREDIENT_AMOUNT,
         error_messages={
             'min_value': f'Количество ингредиента '
-                         f'не может быть меньше'
+                         f'не может быть меньше '
                          f'{MIN_INGREDIENT_AMOUNT}',
             'max_value': f'Количество ингредиента '
-                         f'не может быть больше'
+                         f'не может быть больше '
                          f'{MAX_INGREDIENT_AMOUNT}'
         }
     )
@@ -283,9 +282,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         min_value=MIN_COOKING_TIME,
         max_value=MAX_COOKING_TIME,
         error_messages={
-            'min_value': f'Время приготовления не может быть меньше'
+            'min_value': f'Время приготовления не может быть меньше '
                          f'{MIN_COOKING_TIME} минуты',
-            'max_value': f'Время приготовления не может быть больше'
+            'max_value': f'Время приготовления не может быть больше '
                          f'{MAX_COOKING_TIME} минут'
         }
     )
@@ -349,35 +348,35 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         required_fields = {
             'name', 'text', 'cooking_time', 'tags', 'ingredients'
         }
-        errors = {}
 
         for field in required_fields:
-            if field not in data:
-                errors[field] = ['Обязательное поле.']
-            elif not data[field]:
-                errors[field] = ['Это поле не может быть пустым.']
+            if not data.get(field):
+                raise serializers.ValidationError({
+                    field: ['Обязательное поле.']
+                })
 
-        if 'ingredients' in data:
-            if not data['ingredients']:
-                errors['ingredients'] = ['Добавьте хотя бы один ингредиент.']
-            else:
-                ingredient_ids = {
-                    ingredient['id'].id for ingredient in data['ingredients']
-                }
-                if len(ingredient_ids) != len(data['ingredients']):
-                    errors['ingredients'] = [
-                        'Ингредиенты не должны повторяться.'
-                    ]
+        if not data['ingredients']:
+            raise serializers.ValidationError({
+                'ingredients': ['Добавьте хотя бы один ингредиент.']
+            })
 
-        if 'tags' in data:
-            if not data['tags']:
-                errors['tags'] = ['Добавьте хотя бы один тег.']
-            else:
-                tags_set = {tag for tag in data['tags']}
-                if len(tags_set) != len(data['tags']):
-                    errors['tags'] = ['Теги не должны повторяться.']
+        ingredient_ids = {
+            ingredient['id'].id for ingredient in data['ingredients']
+        }
+        if len(ingredient_ids) != len(data['ingredients']):
+            raise serializers.ValidationError({
+                'ingredients': ['Ингредиенты не должны повторяться.']
+            })
 
-        if errors:
-            raise serializers.ValidationError(errors)
+        if not data['tags']:
+            raise serializers.ValidationError({
+                'tags': ['Добавьте хотя бы один тег.']
+            })
+
+        tags_set = {tag for tag in data['tags']}
+        if len(tags_set) != len(data['tags']):
+            raise serializers.ValidationError({
+                'tags': ['Теги не должны повторяться.']
+            })
 
         return data

@@ -2,12 +2,10 @@ from django.core.files.storage import default_storage
 from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from django_filters.rest_framework import DjangoFilterBackend
 
 from api.filters import RecipeFilter
@@ -186,7 +184,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         if request.method == 'POST':
-            if Subscription.objects.filter(user=user, author=author).exists():
+            if author in user.subscriptions.values_list('author', flat=True):
                 return Response(
                     {'errors': 'Вы уже подписаны на этого пользователя'},
                     status=status.HTTP_400_BAD_REQUEST
