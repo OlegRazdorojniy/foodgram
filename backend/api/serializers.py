@@ -231,7 +231,6 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для чтения рецептов."""
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
@@ -305,7 +304,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def _create_ingredients(self, recipe, ingredients_data):
-        """Вспомогательный метод для создания ингредиентов рецепта."""
         recipe_ingredients = [
             RecipeIngredient(
                 recipe=recipe,
