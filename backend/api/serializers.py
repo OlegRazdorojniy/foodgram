@@ -8,7 +8,7 @@ from djoser.serializers import UserSerializer as BaseUserSerializer
 
 from recipes.fields import Base64ImageField
 from recipes.models import Recipe
-from user.models import Subscription
+from users.models import Subscription
 
 MAX_AVATAR_SIZE = 2 * 1024 * 1024
 User = get_user_model()
