@@ -40,16 +40,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             data = {
-                'user': request.user,
-                'author': author,
+                'user': request.user.id,
+                'author': author.id,
             }
             serializer = SubscriptionSerializer(
                 data=data, context={'request': request}
             )
             if serializer.is_valid():
                 serializer.save()
+                author_serializer = UserSerializer(
+                    author, context={'request': request}
+                )
                 return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
+                    author_serializer.data, status=status.HTTP_201_CREATED
                 )
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
