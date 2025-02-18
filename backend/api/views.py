@@ -17,7 +17,6 @@ from api.serializers import (
     IngredientSerializer,
     RecipeCreateSerializer,
     RecipeSerializer,
-    RecipeShortLinkSerializer,
     RecipeShortSerializer,
     TagSerializer,
     UserAvatarSerializer,
