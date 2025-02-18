@@ -17,7 +17,6 @@ from recipes.models import (
 from users.models import Subscription, User
 
 MAX_AVATAR_SIZE = 2 * 1024 * 1024
-User = get_user_model()
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
